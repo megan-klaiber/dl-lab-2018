@@ -1,0 +1,9 @@
+.ipynb_checkpoints/
+exercise1/exercise_1 - Kopie (2).ipynb
+exercise1/exercise_1 - Kopie (3).ipynb
+exercise1/exercise_1 - Kopie (4).ipynb
+exercise1/exercise_1 - Kopie.ipynb
+*.gz
+*.aux
+*.log
+*.out
