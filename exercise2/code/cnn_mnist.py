@@ -7,6 +7,7 @@ import os
 import pickle
 
 import numpy as np
+from cnn_network import *
 
 
 def one_hot(labels):
@@ -60,14 +61,20 @@ def mnist(datasets_dir='./data'):
     return train_x, one_hot(train_y), valid_x, one_hot(valid_y), test_x, one_hot(test_y)
 
 
-def train_and_validate(x_train, y_train, x_valid, y_valid, num_epochs, lr, num_filters, batch_size):
+def train_and_validate(x_train, y_train, x_valid, y_valid, num_epochs, lr, num_filters, batch_size, filter_size, model_name):
     # TODO: train and validate your convolutional neural networks with the provided data and hyperparameters
 
-    return learning_curve, model  # TODO: Return the validation error after each epoch (i.e learning curve) and your model
+    model = cnn(num_epochs, lr, num_filters, batch_size, filter_size, model_name)
+    train_loss, valid_accuracy , learning_curve = model.train(x_train, y_train, x_valid, y_valid)
+
+    return list(learning_curve), model  # TODO: Return the validation error after each epoch (i.e learning curve) and your model
 
 
 def test(x_test, y_test, model):
     # TODO: test your network here by evaluating it on the test data
+
+    test_error = model.test(x_test, y_test)
+
     return test_error
 
 
@@ -78,14 +85,19 @@ if __name__ == "__main__":
     parser.add_argument("--input_path", default="./", type=str, nargs="?",
                         help="Path where the data is located. If the data is not available it will be downloaded first")
     parser.add_argument("--learning_rate", default=1e-3, type=float, nargs="?", help="Learning rate for SGD")
-    parser.add_argument("--num_filters", default=32, type=int, nargs="?",
+    # default num_filters = 32
+    parser.add_argument("--num_filters", default=16, type=int, nargs="?",
                         help="The number of filters for each convolution layer")
     parser.add_argument("--batch_size", default=128, type=int, nargs="?", help="Batch size for SGD")
+    # default epochs = 12
     parser.add_argument("--epochs", default=12, type=int, nargs="?",
                         help="Determines how many epochs the network will be trained")
     parser.add_argument("--run_id", default=0, type=int, nargs="?",
                         help="Helps to identify different runs of an experiments")
-
+    parser.add_argument("--filter_size", default=3, type=int, nargs="?",
+                        help="Filter width and height")
+    parser.add_argument("--model_name", default='test', type=str, nargs="?",
+                        help="Name of model.")
     args = parser.parse_args()
 
     # hyperparameters
@@ -93,11 +105,18 @@ if __name__ == "__main__":
     num_filters = args.num_filters
     batch_size = args.batch_size
     epochs = args.epochs
+    filter_size = args.filter_size
+    model_name = args.model_name
+
 
     # train and test convolutional neural network
     x_train, y_train, x_valid, y_valid, x_test, y_test = mnist(args.input_path)
 
-    learning_curve, model = train_and_validate(x_train, y_train, x_valid, y_valid, epochs, lr, num_filters, batch_size)
+
+    # test learning rates
+    #learning_rates = [0.1, 0.01, 0.001, 0.0001]
+
+    learning_curve, model = train_and_validate(x_train, y_train, x_valid, y_valid, epochs, lr, num_filters, batch_size, filter_size, model_name)
 
     test_error = test(x_test, y_test, model)
 
@@ -106,13 +125,14 @@ if __name__ == "__main__":
     results["lr"] = lr
     results["num_filters"] = num_filters
     results["batch_size"] = batch_size
+    results["filter_size"] = filter_size
     results["learning_curve"] = learning_curve
     results["test_error"] = test_error
 
     path = os.path.join(args.output_path, "results")
     os.makedirs(path, exist_ok=True)
 
-    fname = os.path.join(path, "results_run_%d.json" % args.run_id)
+    fname = os.path.join(path, "results_run_%s.json" % model_name)
 
     fh = open(fname, "w")
     json.dump(results, fh)
