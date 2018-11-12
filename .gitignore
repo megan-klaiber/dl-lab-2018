@@ -8,3 +8,4 @@ exercise1/exercise_1 - Kopie.ipynb
 *.log
 *.out
 exercise2/model/
+exercise2/code/__pycache__/
