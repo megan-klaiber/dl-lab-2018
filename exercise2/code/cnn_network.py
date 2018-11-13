@@ -13,8 +13,8 @@ class cnn:
         self.model_name = model_name
 
         # placeholder
-        #self.x_placeholder = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
-        #self.y_placeholder = tf.placeholder(tf.float32, shape=[None, 10])
+        self.x_placeholder = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
+        self.y_placeholder = tf.placeholder(tf.float32, shape=[None, 10])
 
     def network_graph(self, x):
         ###### network ######
@@ -59,15 +59,7 @@ class cnn:
 
         return logits
 
-    # create placeholder for input data
-    def create_placeholder(self, x_shape, y_shape):
-        # variable for input and labels
-        self.x_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, *x_shape, 1], name='x_placeholder')
-        self.y_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, y_shape], name='y_placeholder')
-
     def train(self, x_train, y_train, x_valid, y_valid):
-
-        self.create_placeholder(x_train.shape[1:3], y_train.shape[1])
 
         # build network graph
         logits = self.network_graph(self.x_placeholder)
