@@ -13,8 +13,8 @@ class cnn:
         self.model_name = model_name
 
         # placeholder
-        self.x_placeholder = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
-        self.y_placeholder = tf.placeholder(tf.float32, shape=[None, 10])
+        #self.x_placeholder = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
+        #self.y_placeholder = tf.placeholder(tf.float32, shape=[None, 10])
 
     def network_graph(self, x):
         ###### network ######
@@ -59,7 +59,15 @@ class cnn:
 
         return logits
 
+    # create placeholder for input data
+    def create_placeholder(self, x_shape, y_shape):
+        # variable for input and labels
+        self.x_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, *x_shape, 1], name='x_placeholder')
+        self.y_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, y_shape], name='y_placeholder')
+
     def train(self, x_train, y_train, x_valid, y_valid):
+
+        self.create_placeholder(x_train.shape[1:3], y_train.shape[1])
 
         # build network graph
         logits = self.network_graph(self.x_placeholder)
@@ -76,6 +84,10 @@ class cnn:
         # number of batches
         n_samples = x_train.shape[0]
         n_batches = n_samples // self.batch_size
+
+        # number of batches valid
+        n_samples_valid = x_valid.shape[0]
+        n_batches_valid = n_samples_valid // self.batch_size
 
         # saver
         saver = tf.train.Saver()
@@ -117,7 +129,18 @@ class cnn:
 
                 # save accuracies
                 #train_accuracy[e] = accuracy.eval({self.x_placeholder: x_train, self.y_placeholder: y_train})
-                valid_accuracy[e] = accuracy.eval({self.x_placeholder: x_valid, self.y_placeholder: y_valid})
+                #valid_accuracy[e] = accuracy.eval({self.x_placeholder: x_valid, self.y_placeholder: y_valid})
+                #valid_error[e] = 1 - valid_accuracy[e]
+
+                for b in range(n_batches_valid):
+                    # extracting a batch from x_train and y_train
+                    start = b * self.batch_size
+                    end = start + self.batch_size
+                    x_batch_valid = x_valid[start:end, ]
+                    y_batch_valid = y_valid[start:end, ]
+                    valid_accuracy[e] += accuracy.eval({self.x_placeholder: x_batch_valid, self.y_placeholder: y_batch_valid})
+
+                valid_accuracy[e] = valid_accuracy[e] / n_batches_valid
                 valid_error[e] = 1 - valid_accuracy[e]
 
                 print("[%d/%d]: valid_accuracy: %.4f, valid_error: %.4f" % (e + 1, self.num_epochs, valid_accuracy[e], valid_error[e]))
@@ -134,17 +157,29 @@ class cnn:
         save_path = "./model/" + self.model_name + ".meta"
         saver = tf.train.import_meta_graph(save_path)
 
+        n_batches = x_test.shape[0] // self.batch_size
+        test_error = 0
+
         with tf.Session() as sess:
             # saver.restore(sess, model)
             saver.restore(sess, tf.train.latest_checkpoint("./model"))
-
             print('Model restored.')
 
             y_pred = tf.get_collection("pred_network")[0]
 
             # prediction = np.array(sess.run(y_pred, feed_dict={x_placeholder: x_test, y_placeholder: y_test}))
-            prediction = np.array(sess.run(y_pred, feed_dict={self.x_placeholder: x_test}))
-            test_error = float(np.sum(prediction != np.argmax(y_test, axis=1)) / y_test.shape[0])
+            #prediction = np.array(sess.run(y_pred, feed_dict={self.x_placeholder: x_test}))
+            #test_error = float(np.sum(prediction != np.argmax(y_test, axis=1)) / y_test.shape[0])
+
+            for b in range(n_batches):
+                start = b * self.batch_size
+                end = start + self.batch_size
+                x_batch = x_test[start:end, ]
+                y_batch = y_test[start:end, ]
+
+                prediction = np.array(sess.run(y_pred, feed_dict={self.x_placeholder: x_batch}))
+                test_error += float(np.sum(prediction != np.argmax(y_test, axis=1))) / (self.batch_size * n_batches)
+
             print("test error: %.4f" % test_error)
 
         return test_error
