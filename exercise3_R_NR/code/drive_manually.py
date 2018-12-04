@@ -31,8 +31,15 @@ def store_data(data, datasets_dir="./data"):
     if not os.path.exists(datasets_dir):
         os.mkdir(datasets_dir)
     data_file = os.path.join(datasets_dir, 'data.pkl.gzip')
+
+    f = gzip.open(data_file, 'rb')
+    data_load = pickle.load(f)
+
+    for k in data_load.keys():
+        data_load[k].extend(data[k])
+
     f = gzip.open(data_file,'wb')
-    pickle.dump(data, f)
+    pickle.dump(data_load, f)
 
 
 def save_results(episode_rewards, results_dir="./results"):
@@ -93,6 +100,8 @@ if __name__ == "__main__":
             samples["next_state"].append(next_state)
             samples["reward"].append(r)
             samples["terminal"].append(done)
+
+            print(a)
             
             state = next_state
             steps += 1
@@ -107,7 +116,8 @@ if __name__ == "__main__":
                 save_results(episode_rewards, "./results")
 
             env.render()
-            if done: 
+            if done:
+                print('Total points: ', episode_reward)
                 break
         
         episode_rewards.append(episode_reward)

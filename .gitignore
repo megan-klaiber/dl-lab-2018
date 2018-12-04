@@ -10,3 +10,14 @@ exercise1/exercise_1 - Kopie.ipynb
 exercise2/model/
 exercise2/code/__pycache__/
 exercise2/results/hans/
+exercise2/README.md
+exercise3_R_NR/__pycache__/
+exercise3_R_NR/copied_model.py
+exercise3_R_NR/code/random_search.py
+*.gzip
+*.index
+*.meta
+*.data-00000-of-00001
+exercise3_R_NR/models/
+exercise3_R_NR/results/
+exercise3_R_NR/tensorboard/
