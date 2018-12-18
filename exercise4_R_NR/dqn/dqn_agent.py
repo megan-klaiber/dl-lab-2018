@@ -45,11 +45,21 @@ class DQNAgent:
         # 1. add current transition to replay buffer
         # 2. sample next batch and perform batch update: 
         #       2.1 compute td targets: 
-        #              td_target =  reward + discount * argmax_a Q_target(next_state_batch, a)
+        #              td_target =  reward + discount * max_a Q_target(next_state_batch, a)
         #       2.2 update the Q network
         #              self.Q.update(...)
         #       2.3 call soft update for target network
         #              self.Q_target.update(...)
+
+        self.replay_buffer.add_transition(state, action, next_state, reward, terminal)
+
+        batch_states, batch_actions, batch_next_states, batch_rewards, batch_dones = self.replay_buffer.next_batch(self.batch_size)
+
+        td_target = batch_rewards + self.discount_factor * np.max(self.Q_target.predict(self.sess, batch_next_states), 1)
+
+        self.Q.update(self.sess, batch_states, batch_actions, td_target)
+
+        self.Q_target.update(self.sess)
    
 
     def act(self, state, deterministic):
@@ -65,6 +75,7 @@ class DQNAgent:
         if deterministic or r > self.epsilon:
             # TODO: take greedy action (argmax)
             # action_id = ...
+            action_id = np.argmax(self.Q.predict(self.sess, [state]))
         else:
 
             # TODO: sample random action
@@ -72,7 +83,13 @@ class DQNAgent:
             # You can sample the agents actions with different probabilities (need to sum up to 1) so that the agent will prefer to accelerate or going straight.
             # To see how the agent explores, turn the rendering in the training on and look what the agent is doing.
             # action_id = ...
-          
+            action_id = np.random.randint(self.num_actions)
+            # CarRacing
+            #"straight", "left", "right", "accel", "brake" -> this order?
+            #probabilities = []
+            #action_id = np.random.choice(self.num_actions, p=probabilities)
+
+
         return action_id
 
 

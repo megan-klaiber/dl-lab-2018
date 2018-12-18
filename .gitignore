@@ -21,3 +21,4 @@ exercise3_R_NR/code/random_search.py
 exercise3_R_NR/models/
 exercise3_R_NR/results/
 exercise3_R_NR/tensorboard/
+*.pyc

@@ -15,6 +15,12 @@ if __name__ == "__main__":
 
     # TODO: load DQN agent
     # ...
+    state_dim = 4
+    num_actions = 2
+    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions)
+    agent = DQNAgent(Q, Q_target, num_actions)
+    agent.load("./models_cartpole/dqn_agent.ckpt")
  
     n_test_episodes = 15
 

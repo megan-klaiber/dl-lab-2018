@@ -59,6 +59,13 @@ def train_online(env, agent, num_episodes, model_dir="./models_cartpole", tensor
         # TODO: evaluate your agent once in a while for some episodes using run_episode(env, agent, deterministic=True, do_training=False) to 
         # check its performance with greedy actions only. You can also use tensorboard to plot the mean episode reward.
         # ...
+
+        if i % 50 == 0:
+            eval_reward = 0
+            for i in range(5):
+                eval = run_episode(env, agent, deterministic=True, do_training=False)
+                eval_reward += eval.episode_reward
+            #tensorboard.write_episode_data(i, eval_dict={ "eval_reward" : eval_reward})
        
         # store model every 100 episodes and in the end.
         if i % 100 == 0 or i >= (num_episodes - 1):
@@ -79,4 +86,11 @@ if __name__ == "__main__":
     # 1. init Q network and target network (see dqn/networks.py)
     # 2. init DQNAgent (see dqn/dqn_agent.py)
     # 3. train DQN agent with train_online(...)
- 
+
+    state_dim = 4
+    num_actions = 2
+    num_episodes = 10
+    Q = NeuralNetwork(state_dim = state_dim, num_actions=num_actions)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions)
+    agent = DQNAgent(Q, Q_target, num_actions)
+    train_online(env, agent, num_episodes)
