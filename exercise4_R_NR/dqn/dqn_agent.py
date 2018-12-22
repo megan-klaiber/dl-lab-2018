@@ -55,7 +55,16 @@ class DQNAgent:
 
         batch_states, batch_actions, batch_next_states, batch_rewards, batch_dones = self.replay_buffer.next_batch(self.batch_size)
 
-        td_target = batch_rewards + self.discount_factor * np.max(self.Q_target.predict(self.sess, batch_next_states), 1)
+        td_target = np.zeros((self.batch_size))
+
+        for i in range(self.batch_size):
+            if batch_dones[i]:
+                td_target[i] = batch_rewards[i]
+            else:
+                td_target[i] = batch_rewards[i] + self.discount_factor * np.max(self.Q_target.predict(self.sess, [batch_next_states[i]]), 1)
+
+        #td_target = batch_rewards + self.discount_factor * np.max(self.Q_target.predict(self.sess, batch_next_states), 1)
+        #print(td_target.shape)
 
         self.Q.update(self.sess, batch_states, batch_actions, td_target)
 

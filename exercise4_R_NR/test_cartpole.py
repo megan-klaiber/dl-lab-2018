@@ -17,17 +17,19 @@ if __name__ == "__main__":
     # ...
     state_dim = 4
     num_actions = 2
-    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions)
-    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions)
-    agent = DQNAgent(Q, Q_target, num_actions)
+    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions, hidden=16, lr=0.003)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions,  hidden=16, lr=0.003)
+    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.9)
     agent.load("./models_cartpole/dqn_agent.ckpt")
  
     n_test_episodes = 15
 
     episode_rewards = []
     for i in range(n_test_episodes):
+        print("episode: ", i)
         stats = run_episode(env, agent, deterministic=True, do_training=False, rendering=True)
         episode_rewards.append(stats.episode_reward)
+        print(stats.episode_reward)
 
     # save results in a dictionary and write them into a .json file
     results = dict()

@@ -23,6 +23,8 @@ def run_episode(env, agent, deterministic, do_training=True, rendering=False, ma
         action_id = agent.act(state=state, deterministic=deterministic)
         next_state, reward, terminal, info = env.step(action_id)
 
+        #print('action: ', action_id)
+
         if do_training:  
             agent.train(state, action_id, next_state, reward, terminal)
 
@@ -33,7 +35,7 @@ def run_episode(env, agent, deterministic, do_training=True, rendering=False, ma
         if rendering:
             env.render()
 
-        if terminal or step > max_timesteps: 
+        if terminal or step > max_timesteps:
             break
 
         step += 1
@@ -65,11 +67,15 @@ def train_online(env, agent, num_episodes, model_dir="./models_cartpole", tensor
             for i in range(5):
                 eval = run_episode(env, agent, deterministic=True, do_training=False)
                 eval_reward += eval.episode_reward
-            #tensorboard.write_episode_data(i, eval_dict={ "eval_reward" : eval_reward})
-       
+            #tensorboard.write_episode_data(i, eval_dict={ "eval_reward" : eval_reward / 5})
+
         # store model every 100 episodes and in the end.
         if i % 100 == 0 or i >= (num_episodes - 1):
-            agent.saver.save(agent.sess, os.path.join(model_dir, "dqn_agent.ckpt"))
+            agent.saver.save(agent.sess, os.path.join(model_dir, "dqn_agent__.ckpt"))
+
+
+        print('reward: ', stats.episode_reward)
+        #print('action_usage: ', stats.get_action_usage(0), stats.get_action_usage(1))
    
     tensorboard.close_session()
 
@@ -89,8 +95,9 @@ if __name__ == "__main__":
 
     state_dim = 4
     num_actions = 2
-    num_episodes = 10
-    Q = NeuralNetwork(state_dim = state_dim, num_actions=num_actions)
-    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions)
-    agent = DQNAgent(Q, Q_target, num_actions)
+    num_episodes = 300
+
+    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions, hidden=16, lr=0.003)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions, hidden=16, lr=0.003)
+    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.9)
     train_online(env, agent, num_episodes)
