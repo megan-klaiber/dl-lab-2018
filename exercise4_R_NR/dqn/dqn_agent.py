@@ -4,7 +4,7 @@ from dqn.replay_buffer import ReplayBuffer
 
 class DQNAgent:
 
-    def __init__(self, Q, Q_target, num_actions, discount_factor=0.99, batch_size=64, epsilon=0.05):
+    def __init__(self, Q, Q_target, num_actions, discount_factor=0.99, batch_size=64, epsilon=0.05, game='cartpole'):
         """
          Q-Learning agent for off-policy TD control using Function Approximation.
          Finds the optimal greedy policy while following an epsilon-greedy policy.
@@ -17,6 +17,8 @@ class DQNAgent:
             batch_size: Number of samples per batch.
             epsilon: Chance to sample a random action. Float betwen 0 and 1.
         """
+
+        self.game = game
         self.Q = Q      
         self.Q_target = Q_target
         
@@ -66,9 +68,11 @@ class DQNAgent:
         #td_target = batch_rewards + self.discount_factor * np.max(self.Q_target.predict(self.sess, batch_next_states), 1)
         #print(td_target.shape)
 
-        self.Q.update(self.sess, batch_states, batch_actions, td_target)
+        loss = self.Q.update(self.sess, batch_states, batch_actions, td_target)
 
         self.Q_target.update(self.sess)
+
+        return loss
    
 
     def act(self, state, deterministic):
@@ -92,11 +96,24 @@ class DQNAgent:
             # You can sample the agents actions with different probabilities (need to sum up to 1) so that the agent will prefer to accelerate or going straight.
             # To see how the agent explores, turn the rendering in the training on and look what the agent is doing.
             # action_id = ...
-            action_id = np.random.randint(self.num_actions)
-            # CarRacing
-            #"straight", "left", "right", "accel", "brake" -> this order?
-            #probabilities = []
-            #action_id = np.random.choice(self.num_actions, p=probabilities)
+            if self.game == 'cartpole':
+                action_id = np.random.randint(self.num_actions)
+            elif self.game == 'carracing':
+                '''
+                STRAIGHT = 0
+                LEFT = 1
+                RIGHT = 2
+                ACCELERATE = 3
+                BRAKE = 4
+                #RIGHT_BRAKE = 5
+                #LEFT_BRAKE = 6
+                #RIGHT_ACC = 7
+                #LEFT_ACC = 8
+                '''
+                #probabilities = [0.15, 0.1, 0.1, 0.3, 0.05, 0.05, 0.1, 0.1, 0.05]
+                #[0.32, 0.09, 0.09, 0.45, 0.05]
+                probabilities = [0.3, 0.1, 0.1, 0.4, 0.1]
+                action_id = np.random.choice(self.num_actions, p=probabilities)
 
 
         return action_id

@@ -22,3 +22,4 @@ exercise3_R_NR/models/
 exercise3_R_NR/results/
 exercise3_R_NR/tensorboard/
 *.pyc
+exercise4_R_NR/tensorboard/

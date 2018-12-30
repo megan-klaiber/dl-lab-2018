@@ -17,10 +17,10 @@ if __name__ == "__main__":
     # ...
     state_dim = 4
     num_actions = 2
-    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions, hidden=16, lr=0.003)
-    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions,  hidden=16, lr=0.003)
-    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.9)
-    agent.load("./models_cartpole/dqn_agent.ckpt")
+    Q = NeuralNetwork(state_dim=state_dim, num_actions=num_actions, hidden=20, lr=0.001)
+    Q_target = TargetNetwork(state_dim=state_dim, num_actions=num_actions,  hidden=20, lr=0.001)
+    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.99, batch_size=64)
+    agent.load("./models_cartpole/dqn_agent__.ckpt")
  
     n_test_episodes = 15
 
