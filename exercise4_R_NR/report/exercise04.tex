@@ -41,7 +41,7 @@ A simple neural network was used for the CartPole task. It consists of two fully
 	\centering \includegraphics[width=11.70cm, height=7.9cm]{plots/cartpole_episode_reward.png}
 	\caption{
 		\label{fig:cartpole_episode_reward}
-		Achieved reward during training episodes.
+		Achieved reward during training episodes of CartPole.
 	}
 \end{figure}
 
@@ -49,27 +49,35 @@ A simple neural network was used for the CartPole task. It consists of two fully
 	\centering \includegraphics[width=11.70cm, height=7.9cm]{plots/cartpole_evaluation_reward.png}
 	\caption{
 		\label{fig:cartpole_evaluation_reward}
-		Evaluated agent with deterministic actions every 20th episodes (mean episode reward over 5 episodes).
+		Evaluated CartPole agent with deterministic actions every 20th episodes (mean episode reward over 5 episodes).
 	}
 \end{figure}
 
 \subsection{CarRacing}\label{carracing}
 
-%\begin{figure}[H]
-%	\centering \includegraphics[width=11.70cm, height=7.9cm]{plots/carracing_episode_reward.png}
-%	\caption{
-%		\label{fig:carracing_episode_reward}
-%		Achieved reward during training episodes.
-%	}
-%\end{figure}
+For the CarRacing task we used a convolutional neural network. It consists of three convolutional layers with 32 8x8, 64 4x4 and 64 3x3 filters and strides of 4, 2 and 1. After that a fully connected layer with 265 hidden units is added. Like in \autoref{cartpole} the network is optimized with mean squared error and Adam optimizer. The size of the batches sampled from the replay buffer was 128 and we used a learning rate of 0.0003. \\
 
-%\begin{figure}[H]
-%	\centering \includegraphics[width=11.70cm, height=7.9cm]{plots/carracing_evaluation_reward.png}
-%	\caption{
-%		\label{fig:carracing_evaluation_reward}
-%		Evaluated agent with deterministic actions every 20th episodes (mean episode reward over 5 episodes).
-%	}
-%\end{figure}
+For training improvement we skipped four frames and repeated the agents action during this time. For the exploration we set different probabilities for the five actions so the agent prefer the actions accelerate or go straight more often.\\
+
+\autoref{fig:carracing_episode_reward} shows the achieved reward during the training episodes. During training every 20th episode the agent was evaluated with deterministic actions over 5 episodes. The average reward of these 5 episodes is shown in \autoref{fig:carracing_evaluation_reward}. The final performance where evaluated over 15 test episodes. Here the average reward was 559 with a standard deviation of 217. During testing we saw that the agent was able to follow the track but had problems with the sharp curves. For these curves the agent was to fast and didn't slow down.
+
+\begin{figure}[H]
+	\centering \includegraphics[width=11.70cm, height=7.9cm]{plots/carracing_episode_reward.png}
+	\caption{
+		\label{fig:carracing_episode_reward}
+		Achieved reward during training episodes of CarRacing.
+	}
+\end{figure}
+
+\begin{figure}[H]
+	\centering \includegraphics[width=11.70cm, height=7.9cm]{plots/carracing_evaluation_reward.png}
+	\caption{
+		\label{fig:carracing_evaluation_reward}
+		Evaluated CarRacing agent with deterministic actions every 20th episodes (mean episode reward over 5 episodes).
+	}
+\end{figure}
+
+\section{Exploration}
 
 \section{Conclusion}
 

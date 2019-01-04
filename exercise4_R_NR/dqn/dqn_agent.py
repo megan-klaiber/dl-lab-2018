@@ -4,7 +4,7 @@ from dqn.replay_buffer import ReplayBuffer
 
 class DQNAgent:
 
-    def __init__(self, Q, Q_target, num_actions, discount_factor=0.99, batch_size=64, epsilon=0.05, game='cartpole'):
+    def __init__(self, Q, Q_target, num_actions, discount_factor=0.99, batch_size=64, epsilon=0.05, game='cartpole', history_length=0, load_data=False):
         """
          Q-Learning agent for off-policy TD control using Function Approximation.
          Finds the optimal greedy policy while following an epsilon-greedy policy.
@@ -29,7 +29,7 @@ class DQNAgent:
         self.discount_factor = discount_factor
 
         # define replay buffer
-        self.replay_buffer = ReplayBuffer()
+        self.replay_buffer = ReplayBuffer(history_length=history_length, load_data=load_data )
 
         # Start tensorflow session
         self.sess = tf.Session()
@@ -105,16 +105,17 @@ class DQNAgent:
                 RIGHT = 2
                 ACCELERATE = 3
                 BRAKE = 4
-                #RIGHT_BRAKE = 5
-                #LEFT_BRAKE = 6
-                #RIGHT_ACC = 7
-                #LEFT_ACC = 8
+                RIGHT_BRAKE = 5
+                LEFT_BRAKE = 6
+                RIGHT_ACC = 7
+                LEFT_ACC = 8
                 '''
-                #probabilities = [0.15, 0.1, 0.1, 0.3, 0.05, 0.05, 0.1, 0.1, 0.05]
-                #[0.32, 0.09, 0.09, 0.45, 0.05]
-                probabilities = [0.3, 0.1, 0.1, 0.4, 0.1]
-                action_id = np.random.choice(self.num_actions, p=probabilities)
+                #probabilities = [0.2, 0.1, 0.1, 0.25, 0.05, 0.05, 0.1, 0.1, 0.05]
+                # [0.32, 0.09, 0.09, 0.45, 0.05]
+                #probabilities = [0.35, 0.1, 0.1, 0.35, 0.1]
 
+                probabilities = [0.3, 0.1, 0.1, 0.3, 0.2]
+                action_id = np.random.choice(self.num_actions, p=probabilities)
 
         return action_id
 

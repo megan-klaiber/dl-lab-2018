@@ -5,6 +5,9 @@ from dqn.dqn_agent import DQNAgent
 from train_carracing import run_episode
 from dqn.networks import *
 import numpy as np
+import os
+from datetime import datetime
+import json
 
 np.random.seed(0)
 
@@ -20,17 +23,19 @@ if __name__ == "__main__":
     state_dim = (96, 96)
     num_actions = 5
     batch_size = 128
+    history_length = 0
 
-    Q = CNN(state_dim=state_dim, num_actions=num_actions, hidden=256, lr=0.0003, history_length=0)
-    Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, hidden=256, lr=0.0003, history_length=0)
+    Q = CNN(state_dim=state_dim, num_actions=num_actions, hidden=256, lr=0.0003, history_length=history_length)
+    Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, hidden=256, lr=0.0003, history_length=history_length)
     agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.99, batch_size=batch_size, game='carracing')
-    agent.load("./models_carracing/dqn_agent.ckpt")
+    agent.load("./models_carracing/dqn_agent_hist.ckpt")
 
     n_test_episodes = 15
 
     episode_rewards = []
     for i in range(n_test_episodes):
-        stats = run_episode(env, agent, deterministic=True, do_training=False, rendering=True)
+        print("epsiode %d" % i)
+        stats = run_episode(env, agent, deterministic=True, do_training=False, rendering=True, history_length=history_length)
         episode_rewards.append(stats.episode_reward)
         print(stats.episode_reward)
 

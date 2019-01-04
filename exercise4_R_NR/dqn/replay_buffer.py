@@ -3,16 +3,75 @@ import numpy as np
 import os
 import gzip
 import pickle
+from utils import *
+
+def preprocess_data(data, history_length=0):
+    for i in range(len(data["state"])):
+        # Save history
+        # TODO history length
+        image_hist = []
+        for j in range(history_length+1):
+
+            s = data["state"][i]
+            s = state_preprocessing(s)
+            image_hist.extend([s] * (history_length + 1))
+            s = np.array(s).reshape(96, 96, 1)
+
+            a = data["action"][i]
+            a = action_to_id(a)
+
+            ns = data["next_state"][i]
+            ns = state_preprocessing(ns)
+            ns = np.array(ns).reshape(96, 96, 1)
+
+            data["state"][i] = s
+            data["action"][i] = a
+            data["next_state"][i] = ns
+    return data
+
+def store_data(data, datasets_dir="./data", filename='data.pkl.gzip'):
+    # save data
+    if not os.path.exists(datasets_dir):
+        os.mkdir(datasets_dir)
+    data_file = os.path.join(datasets_dir, filename)
+    f = gzip.open(data_file,'wb')
+    pickle.dump(data, f)
+
+
+def load_data(history_length, path="./data"):
+    data_file = os.path.join(path, "data.pkl.gzip")
+
+    f = gzip.open(data_file, "rb")
+    data = pickle.load(f)
+
+    #data = preprocess_data(data)
+    #store_data(data)
+
+    if history_length != 0:
+        data = preprocess_data(data, history_length)
+        store_data(data, filename='data_{}.pkl.gzip'.format(history_length))
+
+    #print(data["state"][1].shape)
+
+    return data
 
 class ReplayBuffer:
 
     # TODO: implement a capacity for the replay buffer (FIFO, capacity: 1e5 - 1e6)
 
     # Replay buffer for experience replay. Stores transitions.
-    def __init__(self, capacity=1e5):
+    def __init__(self, history_length=0, capacity=1e5, load_data=False):
         self._data = namedtuple("ReplayBuffer", ["states", "actions", "next_states", "rewards", "dones"])
         self._data = self._data(states=[], actions=[], next_states=[], rewards=[], dones=[])
         self.capacity = capacity
+
+        if load_data == True:
+            data = load_data(history_length)
+            self._data.states.extend(data["state"])
+            self._data.actions.extend(data["action"])
+            self._data.next_states.extend(data["next_state"])
+            self._data.rewards.extend(data["reward"])
+            self._data.dones.extend(data["terminal"])
 
     def add_transition(self, state, action, next_state, reward, done):
         """

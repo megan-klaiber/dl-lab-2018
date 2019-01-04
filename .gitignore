@@ -23,3 +23,12 @@ exercise3_R_NR/results/
 exercise3_R_NR/tensorboard/
 *.pyc
 exercise4_R_NR/tensorboard/
+exercise4_R_NR/carracing_reward_eval_training/
+exercise4_R_NR/cartpole_reward_eval_training/
+exercise4_R_NR/results/
+exercise4_R_NR/reward_episode_training/
+exercise4_R_NR/carracing/checkpoint
+exercise4_R_NR/cartpole/checkpoint
+exercise4_R_NR/cartpole/experiment-20181228-161105/
+exercise4_R_NR/models_carracing/checkpoint
+exercise4_R_NR/models_cartpole/checkpoint

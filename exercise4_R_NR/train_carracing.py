@@ -11,6 +11,8 @@ from tensorboard_evaluation import *
 import itertools as it
 from utils import *
 
+import json
+
 def run_episode(env, agent, deterministic, skip_frames=0,  do_training=True, rendering=False, max_timesteps=1000, history_length=0):
     """
     This methods runs one episode for a gym environment. 
@@ -76,7 +78,7 @@ def run_episode(env, agent, deterministic, skip_frames=0,  do_training=True, ren
     return stats
 
 
-def train_online(env, agent, num_episodes, history_length=0, model_dir="./models_carracing", tensorboard_dir="./tensorboard"):
+def train_online(env, agent, num_episodes, history_length=0, skip_frames=0, model_dir="./models_carracing", tensorboard_dir="./tensorboard"):
    
     if not os.path.exists(model_dir):
         os.mkdir(model_dir)  
@@ -91,12 +93,15 @@ def train_online(env, agent, num_episodes, history_length=0, model_dir="./models
         print("epsiode %d" % i)
 
         # Hint: you can keep the episodes short in the beginning by changing max_timesteps (otherwise the car will spend most of the time out of the track)
+        '''
         if i < (num_episodes // 3):
             max_timesteps = 250
         else:
             max_timesteps = 1000
+        '''
+        max_timesteps = 1000
 
-        stats = run_episode(env, agent, max_timesteps=max_timesteps, deterministic=False, do_training=True, rendering=False, skip_frames=4)
+        stats = run_episode(env, agent, max_timesteps=max_timesteps, deterministic=False, do_training=True, rendering=False, skip_frames=skip_frames, history_length=history_length)
 
         tensorboard.write_episode_data(i, eval_dict={ "episode_reward" : stats.episode_reward, 
                                                       "straight" : stats.get_action_usage(STRAIGHT),
@@ -111,15 +116,19 @@ def train_online(env, agent, num_episodes, history_length=0, model_dir="./models
         if i % 20 == 0 and i > 0:
             e_reward = 0
             for i in range(5):
-                eval = run_episode(env, agent, deterministic=True, do_training=False)
+                eval = run_episode(env, agent, deterministic=True, do_training=False, history_length=history_length)
                 e_reward += eval.episode_reward
             eval_reward.append(e_reward/5)
 
 
         if i % 100 == 0 or (i >= num_episodes - 1):
-            agent.saver.save(agent.sess, os.path.join(model_dir, "dqn_agent.ckpt"))
+            agent.saver.save(agent.sess, os.path.join(model_dir, "dqn_agent_600.ckpt"))
 
         print('reward: ', stats.episode_reward)
+
+        if eval_reward[-1] >= 600:
+            agent.saver.save(agent.sess, os.path.join(model_dir, "dqn_agent_600.ckpt"))
+            break
 
     path = os.path.join("./", "carracing_reward_eval_training")
     os.makedirs(path, exist_ok=True)
@@ -143,15 +152,21 @@ if __name__ == "__main__":
 
     state_dim = (96, 96)
     num_actions = 5
-    num_episodes = 300
+    num_episodes = 500
     batch_size = 128
-
+    history_length = 0
+    skip_frames = 4
+    load_data = False
     # TODO: Define Q network, target network and DQN agent
     # ...
 
-    Q = CNN(state_dim=state_dim, num_actions=num_actions, hidden=256, lr=0.0003, history_length=0)
-    Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, hidden=256, lr=0.0003, history_length=0)
-    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.99, batch_size=batch_size, game='carracing')
+    # lr 0.0003
+    # skip_frames 4
+    # history_length 0
+    # discount 0.99
+    Q = CNN(state_dim=state_dim, num_actions=num_actions, hidden=256, lr=0.0003, history_length=history_length)
+    Q_target = CNNTargetNetwork(state_dim=state_dim, num_actions=num_actions, hidden=256, lr=0.0003, history_length=history_length)
+    agent = DQNAgent(Q, Q_target, num_actions, discount_factor=0.99, batch_size=batch_size, game='carracing', history_length=history_length, load_data=load_data)
     
-    train_online(env, agent, num_episodes=num_episodes, history_length=0, model_dir="./models_carracing")
+    train_online(env, agent, num_episodes=num_episodes, history_length=history_length, skip_frames=skip_frames, model_dir="./models_carracing")
 

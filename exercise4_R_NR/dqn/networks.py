@@ -103,7 +103,7 @@ class CNN():
         Also creates its loss (mean squared loss) and its optimizer (e.g. Adam with a learning rate of 1e-4).
         """
 
-        self.states_ = tf.placeholder(tf.float32, shape=[None, *state_dim, history_length + 1])
+        self.states_ = tf.placeholder(tf.float32, shape=(None, *state_dim, history_length + 1))
         self.actions_ = tf.placeholder(tf.int32, shape=[None])  # Integer id of which action was selected
         self.targets_ = tf.placeholder(tf.float32, shape=[None])  # The TD target value
 
